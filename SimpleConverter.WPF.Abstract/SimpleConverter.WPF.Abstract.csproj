@@ -3,9 +3,7 @@
   <PropertyGroup>
     <UseWPF>true</UseWPF>
     <IsPackable>true</IsPackable>
+    <Namespace>SimpleConverter</Namespace>
   </PropertyGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\SimpleConverter.WPF.Abstract\SimpleConverter.WPF.Abstract.csproj" />
-  </ItemGroup>
 </Project>

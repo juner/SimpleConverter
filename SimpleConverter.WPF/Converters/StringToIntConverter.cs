@@ -1,17 +1,26 @@
-﻿using System.Globalization;
+﻿using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
 
-namespace GenericConverter
+namespace SimpleConverter.Converters
 {
-    public class StringToIntConverter : SimpleValueConverter<string, NumberStyles, int?>
+    public class StringToIntConverter : SimpleValueConverter<string, NumberStyles?, int?>
     {
-        public override int? Convert(string value, NumberStyles parameter, CultureInfo culture)
-            => int.TryParse(value, parameter, culture, out var result) ? result : (int?)null;
+        public override int? Convert(string value, NumberStyles? parameter, CultureInfo culture)
+            => int.TryParse(value, parameter ?? 0, culture, out var result) ? result : (int?)null;
 
-        public override string ConvertBack(int? value, NumberStyles parameter, CultureInfo culture)
-            => value?.ToString(parameterToFormatString(parameter), culture) ?? string.Empty;
-        private string parameterToFormatString(NumberStyles parameter)
-            => (parameter | NumberStyles.AllowCurrencySymbol) == NumberStyles.AllowCurrencySymbol ? "C"
-            : (parameter | NumberStyles.AllowHexSpecifier) == NumberStyles.AllowHexSpecifier ? "X"
-            : "D";
+        public override string ConvertBack(int? value, NumberStyles? parameter, CultureInfo culture)
+            => value?.ToString(ParameterToFormatString(parameter), culture) ?? string.Empty;
+        private string ParameterToFormatString(NumberStyles? parameter)
+            => FormatList.FirstOrDefault(v => HasFlags(parameter, v.Style)).Format is string Format
+            && !string.IsNullOrEmpty(Format)
+            ? Format : DefaultFormatStyle;
+        private static readonly IEnumerable<(NumberStyles Style, string Format)> FormatList = new List<(NumberStyles, string)>{
+            (NumberStyles.AllowCurrencySymbol, "C"),
+            (NumberStyles.AllowHexSpecifier, "X"),
+        }.AsReadOnly();
+        private static readonly string DefaultFormatStyle = "D";
+        private bool HasFlags(NumberStyles? parameter, NumberStyles flags)
+            => (parameter & flags) == flags;
     }
 }
